@@ -16,11 +16,22 @@ public class User {
 
     private String firstName;
     private String lastName;
-    private boolean isVisable;
+    private boolean isVisible = true;
+    private String deviceId;
     @DBRef
     private Location location;
 
     public User() {
+    }
+
+    public User(String id, String firstName, String lastName, String deviceId, boolean isVisible, Location location) {
+
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.deviceId = deviceId;
+        this.isVisible = isVisible;
+        this.location = location;
     }
 
     public String getId() {
@@ -47,12 +58,20 @@ public class User {
         this.lastName = lastName;
     }
 
-    public boolean isVisable() {
-        return isVisable;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public void setVisable(boolean visable) {
-        isVisable = visable;
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
     }
 
     public Location getLocation() {
@@ -60,15 +79,6 @@ public class User {
     }
 
     public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public User(String id, String firstName, String lastName, boolean isVisable, Location location) {
-
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.isVisable = isVisable;
         this.location = location;
     }
 }
