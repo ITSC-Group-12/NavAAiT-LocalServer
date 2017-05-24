@@ -81,4 +81,9 @@ public class User {
     public void setLocation(Location location) {
         this.location = location;
     }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
 }

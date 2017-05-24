@@ -1,6 +1,5 @@
 package com.itsc.team12.web.rest;
 
-import com.itsc.team12.entity.Location;
 import com.itsc.team12.entity.User;
 import com.itsc.team12.repository.UserRepository;
 import com.itsc.team12.web.rest.util.HeaderUtil;
@@ -11,8 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Created by Sam on 5/10/2017.
@@ -24,7 +25,6 @@ public class UserResource {
     @Autowired
     private UserRepository userRepository;
 
-    //  TODO Testing needed
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<User> register(@RequestBody User user) throws URISyntaxException {
@@ -41,7 +41,6 @@ public class UserResource {
                 .body(result);
     }
 
-    //  TODO Testing needed
     @RequestMapping(value = "/auth", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<User> auth(@RequestBody User user) {
@@ -57,7 +56,6 @@ public class UserResource {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    //  TODO Testing needed
     @RequestMapping(value = "/updateName", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<User> updateName(@RequestBody User user) {
@@ -78,15 +76,43 @@ public class UserResource {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<?> setLocation(String deviceId, Location location) {
-        return null;
+    @RequestMapping(value = "/setLocation", method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity<?> setLocation(@RequestBody User user) {
+        if (validator(user) != null) {
+            return validator(user);
+        }
+        if (user.getLocation() == null) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("Location", "location", "No Location Object provided")).body(null);
+        }
+        User result = userRepository.findByDeviceId(user.getDeviceId());
+
+        if (result != null) {
+            result.setLocation(user.getLocation());
+            userRepository.save(result);
+            return ResponseEntity.ok()
+                    .headers(HeaderUtil.createEntityUpdateAlert("User", result.getId().toString()))
+                    .body(result);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<?> search(String firstName, String lastName) {
-        return null;
+    @RequestMapping(value = "/search", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Set<User>> search(@RequestParam(value = "searchKey", required = true) String searchTerm) {
+        if (searchTerm.isEmpty()) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("SearchTerm", "nosearchterm", "A Search Term is needed.")).body(null);
+        }
+        List<User> firstNameResult = userRepository.findByFirstNameLike(searchTerm);
+        List<User> lastNameResult = userRepository.findByLastNameLike(searchTerm);
+        Set<User> result = new LinkedHashSet<User>();
+        result.addAll(firstNameResult);
+        result.addAll(lastNameResult);
+
+        return new ResponseEntity<Set<User>>(result, HttpStatus.OK);
     }
 
-    //  TODO Testing needed
     @RequestMapping(value = "/getAll", method = RequestMethod.GET)
     @ResponseBody
     public List<User> getAll() {
@@ -95,7 +121,6 @@ public class UserResource {
         return users;
     }
 
-    //  TODO  Testing needed
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<?> get(@PathVariable String id) {
@@ -107,7 +132,6 @@ public class UserResource {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    //  TODO Testing needed
     @RequestMapping(value = "/toggleVisiblity", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> toggleVisiblity(@RequestBody User user) {

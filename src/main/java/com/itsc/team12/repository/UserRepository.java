@@ -14,4 +14,6 @@ public interface UserRepository extends MongoRepository<User, String>{
 
     User findByDeviceId(String deviceId);
     List<User> findByIsVisible(boolean isVisible);
+    List<User> findByFirstNameLike(String firstName);
+    List<User> findByLastNameLike(String lastName);
 }
