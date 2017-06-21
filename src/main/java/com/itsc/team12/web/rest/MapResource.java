@@ -18,6 +18,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +37,9 @@ public class MapResource {
 
     @Value("${root.directory}")
     private String rootDirectory;
+
+    @Value("${fileServer.port}")
+    private String fileServerPort;
 
     @RequestMapping(value = "/checkVersion", method = RequestMethod.GET)
     @ResponseBody
@@ -104,7 +109,12 @@ public class MapResource {
         Map map = new Map();
         map.setVersion(version);
         map.setCreated(LocalDateTime.now());
-        map.setFileName(rootPath + PlatformChecker.FILE_SEPARATOR + mapFile.getOriginalFilename());
+//        map.setFileName(rootPath + PlatformChecker.FILE_SEPARATOR + mapFile.getOriginalFilename());
+        try {
+            map.setFileName(InetAddress.getLocalHost().getHostAddress()+ ":" + fileServerPort + "/Uploads/" + mapFile.getOriginalFilename());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         Map result = mapRepository.save(map);
         return ResponseEntity.accepted()
                 .headers(HeaderUtil.createEntityCreationAlert("Map", result.getId().toString()))

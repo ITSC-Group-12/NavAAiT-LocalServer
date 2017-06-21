@@ -1,6 +1,8 @@
 package com.itsc.team12.web.rest;
 
+import com.itsc.team12.entity.Location;
 import com.itsc.team12.entity.User;
+import com.itsc.team12.repository.LocationRepository;
 import com.itsc.team12.repository.UserRepository;
 import com.itsc.team12.web.rest.util.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class UserResource {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
@@ -88,7 +93,8 @@ public class UserResource {
         User result = userRepository.findByDeviceId(user.getDeviceId());
 
         if (result != null) {
-            result.setLocation(user.getLocation());
+            Location location = locationRepository.save(user.getLocation());
+            result.setLocation(location);
             userRepository.save(result);
             return ResponseEntity.ok()
                     .headers(HeaderUtil.createEntityUpdateAlert("User", result.getId().toString()))
@@ -156,13 +162,13 @@ public class UserResource {
 
     public ResponseEntity validator(User user) {
         if (user.getDeviceId() == null || user.getDeviceId().isEmpty()) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("User", "nodeviceid", "No Device ID provided")).body(null);
+            return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("nodeviceid", "No Device ID provided")).body(null);
         }
         if (user.getFirstName() == null || user.getFirstName().isEmpty()) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("User", "firstname", "No First Name provided")).body(null);
+            return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("firstname", "No First Name provided")).body(null);
         }
         if (user.getLastName() == null || user.getLastName().isEmpty()) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("User", "lastname", "No Last Name provided")).body(null);
+            return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("lastname", "No Last Name provided")).body(null);
         }
         return null;
     }
